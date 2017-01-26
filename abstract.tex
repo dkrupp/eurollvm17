@@ -34,9 +34,9 @@
 \begin{abstract}
 Today Clang SA can perform (context-sensitive) inter-procedural analysis for 
 C,C++ and Objective C files by ''inlining'' 
-the called function into the callers context. This means that that the full 
+the called function into the callers' context. This means that that the full 
 calling context
-(assumptions about function parameters, global variables) is passed when 
+(assumptions about the values of function parameters, global variables) is passed when 
 analyzing the called function and
 then the assumptions about the returned value is passed back to the caller. 
 This works well for function calls within a
@@ -83,12 +83,12 @@ To perform the analysis we need to run clang on the whole source code two times
 %[Cross Translation Analysis Overview]
 \textbf{1st pass:}\\
 The first analysis phase generates 3 important outputs: AST dump of all
-Tranlsation units, a map file for functions with external linkage, the global call flow graph.
+Tranlsation units, a map file for functions with external linkage, the global call graph.
 The AST binary (using the {\tt clang -cc1 -emit-pch}) 
 of each TU is generated into a temporary directory. 
 The mangled name and location of all externally linkable functions 
 are collected into the function definition index (externalFnMap.txt). 
-The global call graph of the program is stored in a file called (cfg.txt).
+The global call graph of the program is stored in another text file.
 \begin{figure}[h!]
 \includegraphics[width=\textwidth]{images/ctu.png}
 \caption{2-Pass CTU analysis overview}
@@ -108,7 +108,7 @@ analyzed first as ''top-level'' functions and all functions that are
 non-top-level are only analyzed in a call context (as they are called). 
 In our CTU implementation, when analyzing a source file, we start the analysis
 from the same top-level functions as the original non-CTU method even if a given
-function is called from another TU (according to the global CFG). 
+function is called from another TU (according to the global call graph). 
 The reason for the choice of this strategy is that if the project 
 contains test cases then library functions would only be analyzed with 
 the concrete test values which would result in loss of generality of the analysis. 
@@ -148,8 +148,8 @@ were switched on.
 The new analysis found significant number of new results on all projects. 
 The number of findings increased by 17\% to 50\%.
 We examined the new findings in detail and most of them are true positive.
-According to our evaluation the CTU analysis did not introduce any new false 
-positives (there was no precision loss at CTU boundary).
+According to our evaluation the CTU analysis the quality of the introduced results
+weren't worse than the non-CTU results (there was no precision loss at CTU boundary).
 
 The CTU analysis revealed many new bugs that require length symbolic analysis,
 such as memory leak problems (unix.Malloc), dereference of null pointers 
@@ -220,8 +220,9 @@ suspect two reasons:
 1. The coverage of the analysis somewhat changed for the base file 
 analyzed, because in some cases the analysis node budget is consumed by 
 the traversal of long CTU paths instead of paths inside the base file. 
-It must be noted that in the Non-CTU case the paths inside the base file 
-have inherently imprecise assumptions about external functions.
+It must be noted that in the non-CTU case the paths inside the base file 
+have inherently imprecise assumptions about external functions. We plan to
+address this issue in the future work.
 
 2. It is also possible that some of the findings disappeared 
 compared the baseline because they were false positives as they were based on 
@@ -270,7 +271,7 @@ ASTImporter needs to be improved to handle C++ language constructs better.
 We plan to measure coverage and experiment with different strategies
 to build the exploded graph. One simple strategy might be to bound
 the number of file traversals.
-\item Flow based bug reports have a so-called uniqueing location that helps
+\item Some path sensitive based bug reports have a so-called uniqueing location that helps
 to differentiate them. This works for single TUs, but we would like
 to extend this to multiple TUs.
 \item During the analysis, we need to store the dumped ASTs temporarily. 
