@@ -18,7 +18,7 @@
 
 \newtheorem{prob}[theorem]{Problem}
 
-\title{Cross Translational Unit Analisys in Clang Static Analyzer: Prototype and measurements}
+\title{Cross Translational Unit Analysis in Clang Static Analyzer: Prototype and measurements}
 \author{D\'aniel Krupp\inst1,\ Zolt\'an Porkol\'ab\inst1,\ Gy\"orgy Orb\'an\inst1\\
         G\'abor Horv\'ath\inst2,\ Zolt\'an Gera\inst2}
 \institute{\inst1Ericsson Ltd., \inst2E\"{o}tv\"{o}s Lor\'{a}nd University, Faculty of Informatics\\
@@ -88,7 +88,7 @@ To perform the analysis we need to run clang on the whole source code two times
 
 \subsubsection*{1st pass}
 The first analysis phase generates 3 important outputs: AST dump of all
-Tranlsation units, a map file for functions with external linkage, the global call graph.
+Translation units, a map file for functions with external linkage, the global call graph.
 The AST binary (using the {\tt clang -cc1 -emit-pch}) 
 of each TU is generated into a temporary directory. 
 The mangled name and location of all externally linkable functions 
@@ -109,7 +109,7 @@ of that function is looked up from in the function definition index and the
 definition is imported from the containing AST binary into the caller's context
 using the \texttt{ASTImpoter} library.
 
-\subsection{Traversal of the the control flow graph}
+\subsection{Traversal of the control flow graph}
 In the non-CTU analysis, functions that are not called from within the TU are
 analyzed first as ''top-level'' functions and all functions that are 
 non-top-level are only analyzed in a call context (as they are called). 
@@ -126,7 +126,7 @@ fork~\cite{ctugithub}.
 
 \section{ Results on Open Source projects}
 We have analyzed many open source projects 
-(ffmpeg, tmux, curl, vim, postgresql...) using CTU and 
+(FFmpeg, Tmux, Curl, Vim, PostgreSQL...) using CTU and 
 found many new true positive reports (see Table~\ref{tblfindings}.
 
 The measurements were taken using clang 4.0 as the baseline and the same 
@@ -138,18 +138,18 @@ were switched on.
 \centering
 \begin{tabular}{| L{1.6cm}| C{1.6cm} | C{1.6cm} | C{1.6cm} | C{1.6cm} | C{1.6cm} |}
   \hline
-  Analyzed project& All Non-CTU Findings (baseline)&All CTU Findings&New CTU findings & Disappeared findings & Successfully / Failed to analyze
+  Analyzed project& All non-CTU Findings (baseline)&All CTU Findings&New CTU findings & Disappeared findings & Successfully / Failed to analyze
   \\
   \hline
   \hline
-  FFMpeg& 339& 399 & 101& 41& 1555/8 files \\
+  FFmpeg& 339& 399 & 101& 41& 1555/8 files \\
   \hline
   TMux& 49& 77 & 29& 1 & 133/0 files \\
   \hline
   Curl& 7& 11& 4& 0 & 280/13 files\\
   \hline  
 \end{tabular}
-\caption{CTU and Non-CTU results comparison}
+\caption{CTU and non-CTU results comparison}
 \label{tblfindings}
 \end{table}
 
@@ -167,7 +167,7 @@ such as memory leak problems (unix.Malloc), dereference of null pointers
 and usage of uninitialized values (core.uninitialized.Assign,\\ 
 core.uninitialized.Branch, core.UndefinedBinaryOperatorResult). 
 
-See for example distribution of new findings for FFMPeg project in 
+See for example distribution of new findings for FFmpeg project in 
 Table~\ref{tblffmpegbugs}.
 
 \begin {table}[h!]
@@ -202,7 +202,7 @@ We expected that the bug path length of the new results will be longer
 than the results in the baseline, due to the long traversal of function 
 calls into external source files (see Table~\ref{tblbpl}). This assumption turned out to be true as
 the median of the bug path length of new bugs is 16 compared to the non-ctu 
-case 7 (for ffmpeg). However in practice 16 long bug path are still 
+case 7 (for FFmpeg). However in practice 16 long bug path are still 
 manageable for programmers.
 
 \begin {table}[h!]
@@ -219,7 +219,7 @@ manageable for programmers.
   Curl& 1&1&12&n.a.\\
   \hline  
 \end{tabular}
-\caption{CTU and Non-CTU Bug Path Length comparison}
+\caption{CTU and non-CTU Bug Path Length comparison}
 \label{tblbpl}
 \end{table}
 
@@ -231,7 +231,7 @@ suspect two reasons:
   \item The coverage of the analysis somewhat changed for the base file
         analyzed, because in some cases the analysis node budget is consumed
         by the traversal of long CTU paths instead of paths inside the base
-        file. It must be noted that in the Non-CTU case the paths inside the
+        file. It must be noted that in the non-CTU case the paths inside the
         base file have inherently imprecise assumptions about external
         functions.
 
@@ -259,17 +259,17 @@ are analyzed independently.
 \centering
 \begin{tabular}{| L{2cm}| C{2cm} | C{2cm} | C{2cm}|}
   \hline
-  Analyzed project& Analysis Time (baseline)[s]&Analysis Time XTU (1st + 2nd Phase)[s]\\
+  Analyzed project& Analysis Time (baseline)[s]&Analysis Time CTU (1st + 2nd Phase)[s]\\
   \hline
   \hline
-  FFMpeg& 318&44+693\\
+  FFmpeg& 318&44+693\\
   \hline
   TMux& 39&4+75\\
   \hline
   Curl& 32&6.5+54\\
   \hline  
 \end{tabular}
-\caption{CTU and Non-CTU analysis time comparison}
+\caption{CTU and non-CTU analysis time comparison}
 \label{tbltime}
 \end{table}
 
