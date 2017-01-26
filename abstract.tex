@@ -157,6 +157,37 @@ such as memory leak problems (unix.Malloc), dereference of null pointers
 and usage of uninitialized values (core.uninitialized.Assign,\\ 
 core.uninitialized.Branch, core.UndefinedBinaryOperatorResult). 
 
+See for example distribution of new findings for FFMPeg project in 
+Table \ref{tblffmpegbugs}.
+
+\begin {table}[h!]
+\centering
+\begin{tabular}{| l|| c |}
+\hline
+Checker ID&                          Number of new findings \\
+\hline
+\hline
+core.CallAndMessage                &  5 \\
+\hline
+core.DivideZero                    & 5 \\     
+\hline
+core.NonNullParamChecker           & 12 \\     
+\hline
+core.NullDereference               & 18 \\     
+\hline
+core.UndefinedBinaryOperatorResult & 21 \\     
+\hline
+core.uninitialized.Assign          & 11 \\     
+\hline
+core.uninitialized.Branch          & 6  \\     
+\hline
+unix.Malloc                        & 23 \\
+\hline
+\end{tabular}
+\caption{Distrubution of new bug findings on FFmpeg project}
+\label{tblffmpegbugs}
+\end{table}
+
 We expected that the bug path length of the new results will be longer 
 than the results in the baseline, due to the long traversal of function 
 calls into external source files (see Table \ref{tblbpl}. This assumption turned out to be true as 
