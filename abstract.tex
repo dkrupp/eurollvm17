@@ -47,24 +47,24 @@ is implemented in another TU, the analyzer engine
 skips the analysis of the called function definition. In particular,
 assumptions about references and pointers passed as function 
 parameter get invalidated, and the return value of the function will be unknown.
-Loosing precision this way may lead to false positive 
+Losing precision this way may lead to false positive
 and false negative findings.
 
 The cross translation unit (CTU) feature would allow the analysis of called 
 functions even if the definition of the function is external to the currently 
 analyzed TU. This would allow detection of bugs in library functions stemming
 from incorrect usage (e.g. a library assumes that the user will free a memory 
-  block allocated by the library), and allows for more precise analysis in 
-general of the caller if a TU external function is invoked 
-(by not loosing assumptions).
+block allocated by the library), and allows for more precise analysis in
+general of the caller if a TU external function is invoked
+(by not losing assumptions).
 
-We implemented (based on the prototype by A. Sidorin et al. \cite{artemctu}) 
+We implemented (based on the prototype by A. Sidorin, et al.~\cite{artemctu})
 the Cross Translation Unit analysis feature for Clang SA (4.0) and evaluated 
 its performance on various open source projects. In our presentation we show 
 that with the CTU feature we found many new true positive reports and 
 eliminated some false positives in real open source projects. We show that 
 while the total analysis time increases to 2-3 times, the execution remains
-scalable to the number of processors. We also point out how the analysis
+scalable to the number of CPUs. We also point out how the analysis
 coverage changes that may lead to the loss of reports compared to the 
 non-CTU baseline.
 \keywords C++ programming language, static analysis, cross translation unit analysis
@@ -107,11 +107,11 @@ The Clang Static Analyzer is run for all translation units. When during the
 analysis a TU external function is reached, the location of the definition 
 of that function is looked up from in the function definition index and the 
 definition is imported from the containing AST binary into the caller's context
-using the \texttt{ASTImpoter} library.
+using the \texttt{ASTImporter} library.
 
 \subsection{Traversal of the call graph}
 In the non-CTU analysis, functions that are not called from within the TU are
-analyzed first as ''top-level'' functions and all functions that are 
+analyzed first as ``top-level'' functions and all functions that are
 non-top-level are only analyzed in a call context (as they are called). 
 In our CTU implementation, when analyzing a source file, we start the analysis
 from the same top-level functions as the original non-CTU method even if a given
@@ -124,14 +124,14 @@ The source code of the prototype is available in this clang GitHub
 fork~\cite{ctugithub}.
 
 
-\section{ Results on Open Source projects}
+\section{Results on Open Source projects}
 We have analyzed many open source projects 
-(FFmpeg, Tmux, Curl, Vim, PostgreSQL...) using CTU and 
+(FFmpeg, tmux, curl, Vim, PostgreSQL, \dots) using CTU and
 found many new true positive reports (see Table~\ref{tblfindings}.
 
-The measurements were taken using clang 4.0 as the baseline and the same 
-clang 4.0 with the CTU patch. Only the by default enabled (stable) checkers 
-were switched on. To compare and view the results we used CodeChecker \ref{codechecker}.
+The measurements were taken using clang-4.0 as the baseline and the same
+clang-4.0 with the CTU patch. Only the by default enabled (stable) checkers
+were switched on. To compare and view the results we used CodeChecker~\ref{codechecker}.
 
 
 \begin {table}[h!]
@@ -144,9 +144,9 @@ were switched on. To compare and view the results we used CodeChecker \ref{codec
   \hline
   FFmpeg& 339& 399 & 101& 41& 1555/8 files \\
   \hline
-  TMux& 49& 77 & 29& 1 & 133/0 files \\
+  tmux& 49& 77 & 29& 1 & 133/0 files \\
   \hline
-  Curl& 7& 11& 4& 0 & 280/13 files\\
+  curl& 7& 11& 4& 0 & 280/13 files\\
   \hline  
 \end{tabular}
 \caption{CTU and non-CTU results comparison}
@@ -156,16 +156,17 @@ were switched on. To compare and view the results we used CodeChecker \ref{codec
 
 \subsection{Quality of new results}
 The new analysis found significant number of new results on all projects. 
-The number of findings increased by 17\% to 50\%.
+The number of findings increased by $17\%$ to $50\%$.
 We examined the new findings in detail and most of them are true positive.
 According to our evaluation the CTU analysis the quality of the introduced results
 weren't worse than the non-CTU results (there was no precision loss at CTU boundary).
 
 The CTU analysis revealed many new bugs that require length symbolic analysis,
-such as memory leak problems (unix.Malloc), dereference of null pointers 
-(core.NullDereference, core.NonNullParamChecker, core.CallAndMessage)
-and usage of uninitialized values (core.uninitialized.Assign,\\ 
-core.uninitialized.Branch, core.UndefinedBinaryOperatorResult). 
+such as memory leak problems (\texttt{unix.Malloc}), dereference of null pointers
+(\texttt{core.NullDereference}, \texttt{core.NonNullParamChecker},
+\texttt{core.CallAndMessage}) \\ and usage of uninitialized values
+(\texttt{core.uninitialized.Assign}, \\ \texttt{core.uninitialized.Branch},
+\texttt{core.UndefinedBinaryOperatorResult}).
 
 See for example distribution of new findings for FFmpeg project in 
 Table~\ref{tblffmpegbugs}.
@@ -201,7 +202,7 @@ unix.Malloc                        & 23 \\
 We expected that the bug path length of the new results will be longer 
 than the results in the baseline, due to the long traversal of function 
 calls into external source files (see Table~\ref{tblbpl}). This assumption turned out to be true as
-the median of the bug path length of new bugs is 16 compared to the non-ctu 
+the median of the bug path length of new bugs is 16 compared to the non-CTU
 case 7 (for FFmpeg). However in practice 16 long bug path are still 
 manageable for programmers.
 
@@ -212,11 +213,11 @@ manageable for programmers.
   Analyzed project & Median of bug path length (BPL) in baseline&Median of BPL CTU&Median of BPL of new findings&Median of BPL of disappeared findings\\
   \hline
   \hline
-  FFMpeg&7&9&16&14\\
+  FFmpeg&7&9&16&14\\
   \hline
-  TMux&16&16&17&6\\
+  tmux&16&16&17&6\\
   \hline
-  Curl& 1&1&12&n.a.\\
+  curl& 1&1&12&n.a.\\
   \hline  
 \end{tabular}
 \caption{CTU and non-CTU Bug Path Length comparison}
@@ -247,7 +248,7 @@ pages:~\cite{ffmpegres},~\cite{tmuxres},~\cite{curlres}.
 
 \subsection{Performance}
 In general the analysis time (including both analysis passes) 
-increased $\sim$2 to $\sim$2.5 times the baseline non-CTU analysis time on all analyzed
+increased $\sim 2$ to $\sim 2.5$ times the baseline non-CTU analysis time on all analyzed
 projects (see Table~\ref{tbltime}). The increment is due to the first analysis phase and the extra effort
 of loading the definition of external function from the disc during the
 analysis. The measurements were performed on the same machine, on 16 CPU cores.
@@ -259,12 +260,12 @@ are analyzed independently.
 \centering
 \begin{tabular}{| L{2cm}| C{2cm} | C{2cm} | C{2cm}|}
   \hline
-  Analyzed project& Analysis Time (baseline)[s]&Analysis Time CTU (1st + 2nd Phase)[s]\\
+  Analyzed project& Analysis Time (baseline) {\scriptsize [s]} &Analysis Time CTU (1st + 2nd Phase) {\scriptsize [s]}\\
   \hline
   \hline
   FFmpeg& 318&44+693\\
   \hline
-  TMux& 39&4+75\\
+  tmux& 39&4+75\\
   \hline
   Curl& 32&6.5+54\\
   \hline  
@@ -276,43 +277,45 @@ are analyzed independently.
 \section{Future work}
 
 \begin{itemize}
-\item The current CTU prototype is only usable for C projects.
-  We experienced many crashes and assertion failures with the
-  \texttt{ASTImporter} for C++ projects.
-  \texttt{ASTImporter} needs to be improved to handle C++ language elements
-  and constructs better.
-\item \emph{Do we lose true positives and coverage in the base file?}
-We plan to measure coverage and experiment with different strategies
-to build the exploded graph. One simple strategy might be to bound
-the number of file traversals.
+  \item The current CTU prototype is only usable for C projects.
+    We experienced many crashes and assertion failures with the
+    \texttt{ASTImporter} for C++ projects.
+    \texttt{ASTImporter} needs to be improved to handle C++ language elements
+    and constructs better.
 
-\item Some path sensitive based bug reports have a so-called uniqueing location that helps
-to differentiate them. This works for single TUs, but we would like
-to extend this to multiple TUs.
-\item During the analysis, we need to store the dumped ASTs temporarily. 
-We thought of ways decrease the disc allocation by compressing or 
-more efficiently storing the AST dumps.
+  \item \emph{Do we lose true positives and coverage in the base file?}
+    We plan to measure coverage and experiment with different strategies
+    to build the exploded graph. One simple strategy might be to bound
+    the number of file traversals.
+
+  \item Some path sensitive based bug reports have a so-called uniquing location that helps
+    to differentiate them. This works for single TUs, but we would like
+    to extend this to multiple TUs.
+
+  \item During the analysis, we need to store the dumped ASTs temporarily.
+    We thought of ways decrease the disc allocation by compressing or
+    more efficiently storing the AST dumps.
 \end{itemize}
 
-\section{Credits} % Helyette Related work? Previous work?
+\section{Credits}
 This work is based on earlier work of Aleksei Sidorin,\ Artem Dergachev,\ 
 et al.\@ See \url{http://lists.llvm.org/pipermail/cfe-dev/2015-October/045730.html}
 
 \begin{thebibliography}{9}
 \bibitem{ccelte} Cross-TU Analysis results on open source projects, \url{http://cc.elte.hu/}
 
-\bibitem{artemctu} Artem Dergachev, Aleksei Sidorin Cross TU Analysis for Clang 
-3.4 \url{http://lists.llvm.org/pipermail/cfe-dev/2015-October/045730.html}
+\bibitem{artemctu} Artem Dergachev, Aleksei Sidorin: \emph{Cross TU Analysis for Clang 3.4}
+  \url{http://lists.llvm.org/pipermail/cfe-dev/2015-October/045730.html}
 
-\bibitem{ericssonctu} Ericsson CTU open source repository: \url{https://github.com/dkrupp/clang/tree/ctu-master}
+\bibitem{ericssonctu} Ericsson CTU open source repository, \url{https://github.com/dkrupp/clang/tree/ctu-master}
 \bibitem{ctugithub} \url{https://github.com/dkrupp/clang/tree/ctu-master}
-\bibitem{ffmpeg} FFMPeg project,  \url{https://github.com/FFmpeg/FFmpeg}
-\bibitem{tmux} TMux project, \url{https://github.com/tmux/tmux}
-\bibitem{curl} CUrl project, \url{https://github.com/curl/curl}
-\bibitem{astimporter} ASTImporter, \url{http://clang.llvm.org/doxygen/classclang_1_1ASTImporter.html}
-\bibitem{ffmpegres} FFmpeg CTU Results {\small \url{https://github.com/dkrupp/clang/wiki/FFMpeg-XTU-Analysis}}
-\bibitem{tmuxres} TMUX CTU Results \url{https://github.com/dkrupp/clang/wiki/TMUX-XTU-Analysis}
-\bibitem{curlres} CURL CTU Results \url{https://github.com/dkrupp/clang/wiki/Curl-XTU-Analysis}
-\bibitem{codechecker} CodeChecker \url{https://github.com/Ericsson/codechecker}
+\bibitem{ffmpeg} FFmpeg project, \url{https://github.com/FFmpeg/FFmpeg}
+\bibitem{tmux} tmux project, \url{https://github.com/tmux/tmux}
+\bibitem{curl} curl project, \url{https://github.com/curl/curl}
+\bibitem{astimporter} \texttt{ASTImporter}, \url{http://clang.llvm.org/doxygen/classclang_1_1ASTImporter.html}
+\bibitem{ffmpegres} FFmpeg CTU Results, {\small \url{https://github.com/dkrupp/clang/wiki/FFMpeg-XTU-Analysis}}
+\bibitem{tmuxres} tmux CTU Results, \url{https://github.com/dkrupp/clang/wiki/TMUX-XTU-Analysis}
+\bibitem{curlres} curl CTU Results, \url{https://github.com/dkrupp/clang/wiki/Curl-XTU-Analysis}
+\bibitem{codechecker} CodeChecker, \url{https://github.com/Ericsson/codechecker}
 \end{thebibliography}
 \end{document} 
