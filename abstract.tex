@@ -109,7 +109,7 @@ of that function is looked up from in the function definition index and the
 definition is imported from the containing AST binary into the caller's context
 using the \texttt{ASTImpoter} library.
 
-\subsection{Traversal of the control flow graph}
+\subsection{Traversal of the call graph}
 In the non-CTU analysis, functions that are not called from within the TU are
 analyzed first as ''top-level'' functions and all functions that are 
 non-top-level are only analyzed in a call context (as they are called). 
