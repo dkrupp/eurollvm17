@@ -34,7 +34,7 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-Today Clang SA can perform (context-sensitive) inter-procedural analysis for 
+Today Clang Static Analyzer \cite{clangsa} can perform (context-sensitive) inter-procedural analysis for 
 C,C++ and Objective C files by ''inlining'' 
 the called function into the callers' context. This means that that the full 
 calling context
@@ -63,18 +63,18 @@ the Cross Translation Unit analysis feature for Clang SA (4.0) and evaluated
 its performance on various open source projects. In our presentation, we show 
 that by using the CTU feature we found many new true positive reports and 
 eliminated some false positives in real open source projects. We show that 
-while the total analysis time increases to 2-3 times, the execution remains
-scalable in the number of CPUs. We also point out how the analysis
+while the total analysis time increases to 2-3 times to the non-CTU analysis time,
+the execution remains scalable in the number of CPUs. We also point out how the analysis
 coverage changes that may lead to the loss of reports compared to the 
 non-CTU baseline version.
-\keywords C++ programming language, static analysis, cross translation unit analysis
+\keywords C++ programming language, static analysis, cross translation unit analysis, clang
 \end{abstract}
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Description of the CTU prototype}
 Our method being worked on enables CTU analysis 
-by inlining external function definitions using clang's existing ASTImporter 
+by inlining external function definitions using clang's \cite{clang} existing ASTImporter 
 (see \cite{astimporter}) functionality.
 One of our goals was to have minimal, isolated, and lightweight changes.
 We added less than 300 lines of code to the clang codebase 
@@ -87,10 +87,10 @@ To perform the analysis, we need to run clang on the whole source code two times
 %[Cross Translation Analysis Overview]
 
 \subsubsection*{1st pass}
-The first analysis phase generates 3 important outputs: AST dump of all
-translation units, a map file for functions with external linkage, the global call graph.
-The AST binary (using the {\tt clang -emit-ast}) 
-of each TU is generated into a temporary directory. 
+The first analysis phase generates 3 important outputs: Abstract Syntax Tree (AST) dump of all
+translation units, a map file for functions with external linkage and the global call graph.
+The AST (using the {\tt clang -emit-ast}) 
+of each TU is generated into a temporary directory in a binary format. 
 The mangled name and location of all externally linkable functions 
 are collected into the function definition index (externalFnMap.txt). 
 
@@ -131,7 +131,7 @@ found many new true positive reports (see Table~\ref{tblfindings}).
 
 The measurements were taken using clang-4.0 as the baseline and the same
 clang-4.0 with the CTU patch. Only the (stable) checkers enabled by default
-were switched on. To compare and view the results we have used CodeChecker~\cite{codechecker}.
+were switched on in both cases. To compare and view the results we have used CodeChecker~\cite{codechecker}.
 
 
 \begin {table}[h!]
@@ -201,12 +201,12 @@ unix.Malloc                        & 23 \\
 
 You can see from Table~\ref{tblfindings} that the CTU analysis of some file failed.
 The reason for this was that either ASTImporter failed to import the external
-funcion definitions or created a corrupted AST which caused the clang analyis
+function definitions or created a corrupted AST which caused the clang analysis
 to fail. So ASTImporter needs further development to handle more C and C++ language
 constructs. We performed the comparison analysis only for those files which were
 successfully analyzed by the CTU prototype.
 
-We expected that the bug path length of the new results would be longer 
+We expected that the bug path length (BPL) of the new results would be longer 
 than the results in the baseline, due to the long traversal of function 
 calls into external source files (see Table~\ref{tblbpl}). This assumption turned out to be true as
 the median of the bug path length of new bugs is 16 compared to the non-CTU
@@ -217,7 +217,7 @@ manageable for programmers.
 \centering
 \begin{tabular}{| C{2cm}|| C{2cm} | C{2cm} |C{2cm} |C{2cm} |}
   \hline
-  Analyzed project & Median of bug path length (BPL) in baseline&Median of BPL CTU&Median of BPL of new findings&Median of BPL of disappeared findings\\
+  Analyzed project & Median of (BPL) in baseline&Median of BPL CTU&Median of BPL of new findings&Median of BPL of disappeared findings\\
   \hline
   \hline
   FFmpeg&7&9&16&14\\
@@ -241,7 +241,8 @@ suspect two reasons:
         by the traversal of longer CTU paths instead of paths inside the base
         file. It must be noted that in the non-CTU case the paths inside the
         base file have inherently imprecise assumptions about external
-        functions.
+        functions. This can be later fine tuned by limiting the CTU file 
+        traversals.
 
   \item It is also possible that some of the findings disappeared
         compared the baseline because they were false positives as they were
@@ -300,7 +301,7 @@ are analyzed independently.
     We would like to extend them to multiple TUs.
 
   \item During the analysis, we need to store the dumped ASTs temporarily.
-    We plan to decrease the disk usage by compressing AST dumps or
+    We plan to decrease the disk space usage by compressing AST dumps or
     storing them more efficiently.
 \end{itemize}
 
@@ -314,6 +315,8 @@ et al.\@ See \url{http://lists.llvm.org/pipermail/cfe-dev/2015-October/045730.ht
 \bibitem{artemctu} Artem Dergachev, Aleksei Sidorin: \emph{Cross TU Analysis for Clang 3.4}
   \url{http://lists.llvm.org/pipermail/cfe-dev/2015-October/045730.html}
 
+\bibitem{clang} clang: a C language family frontend for LLVM, \url{https://clang.llvm.org/}
+\bibitem{clangsa} Clang Static Analyzer, \url{https://clang-analyzer.llvm.org/}
 \bibitem{ericssonctu} Ericsson CTU open source repository, \url{https://github.com/dkrupp/clang/tree/ctu-master}
 \bibitem{ctugithub} \url{https://github.com/dkrupp/clang/tree/ctu-master}
 \bibitem{ffmpeg} FFmpeg project, \url{https://github.com/FFmpeg/FFmpeg}
