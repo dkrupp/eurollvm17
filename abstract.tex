@@ -127,7 +127,7 @@ fork~\cite{ctugithub}.
 \section{Results on Open Source projects}
 We have analyzed many open source projects 
 (FFmpeg, tmux, curl, Vim, PostgreSQL, \dots) using CTU and
-found many new true positive reports (see Table~\ref{tblfindings}.
+found many new true positive reports (see Table~\ref{tblfindings}).
 
 The measurements were taken using clang-4.0 as the baseline and the same
 clang-4.0 with the CTU patch. Only the (stable) checkers enabled by default
@@ -155,7 +155,7 @@ were switched on. To compare and view the results we have used CodeChecker~\cite
 
 
 \subsection{Quality of new results}
-The new analysis method has found significant number of new results on all projects. 
+The new analysis method has found significant number of new results on all\\ projects. 
 The number of findings increased by $17\%$ to $50\%$.
 We examined the new findings in detail and most of them are true positive.
 According to our evaluation of the CTU analysis, the quality of the introduced results
@@ -199,6 +199,13 @@ unix.Malloc                        & 23 \\
 \label{tblffmpegbugs}
 \end{table}
 
+You can see from Table~\ref{tblfindings} that the CTU analysis of some file failed.
+The reason for this was that either ASTImporter failed to import the external
+funcion definitions or created a corrupted AST which caused the clang analyis
+to fail. So ASTImporter needs further development to handle more C and C++ language
+constructs. We performed the comparison analysis only for those files which were
+successfully analyzed by the CTU prototype.
+
 We expected that the bug path length of the new results would be longer 
 than the results in the baseline, due to the long traversal of function 
 calls into external source files (see Table~\ref{tblbpl}). This assumption turned out to be true as
@@ -217,7 +224,7 @@ manageable for programmers.
   \hline
   tmux&16&16&17&6\\
   \hline
-  curl& 1&1&12&n.a.\\
+  curl& 1&1&12&---\\
   \hline  
 \end{tabular}
 \caption{CTU and non-CTU Bug Path Length comparison}
@@ -267,7 +274,7 @@ are analyzed independently.
   \hline
   tmux& 39&4+75\\
   \hline
-  Curl& 32&6.5+54\\
+  curl& 32&6.5+54\\
   \hline  
 \end{tabular}
 \caption{CTU and non-CTU analysis time comparison}
@@ -280,7 +287,7 @@ are analyzed independently.
   \item The current CTU prototype is only usable for C projects.
     We have experienced many crashes and assertion failures of the
     \texttt{ASTImporter} for C++ projects.
-    \texttt{ASTImporter} needs to be improved to handle C++ language elements
+    We plan to work on \texttt{ASTImporter} to handle C/C++ language elements
     and constructs better.
 
   \item \emph{Do we lose true positives and coverage in the base file?}
