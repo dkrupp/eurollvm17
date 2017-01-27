@@ -35,7 +35,7 @@
 
 \begin{abstract}
 Today Clang Static Analyzer \cite{clangsa} can perform (context-sensitive) inter-procedural analysis for 
-C,C++ and Objective C files by ''inlining'' 
+C, C++ and Objective C files by ''inlining'' 
 the called function into the callers' context. This means that that the full 
 calling context
 (assumptions about the values of function parameters, global variables) is passed when 
@@ -52,7 +52,7 @@ and false negative findings.
 
 The cross translation unit (CTU) feature allows the analysis of called 
 functions even if the definition of the function is external to the currently 
-analyzed TU. This would allow detection of bugs in library functions stemming
+analyzed TU. This allows detection of bugs in library functions stemming
 from incorrect usage (e.g. a library assumes that the user will free a memory 
 block allocated by the library), and allows for more precise analysis
 of the caller in general if a TU external function is invoked
@@ -66,8 +66,8 @@ eliminated some false positives in real open source projects. We show that
 while the total analysis time increases by 2-3 times compared to 
 the non-CTU analysis time, the execution remains scalable in the number of CPUs. 
 We also point out how the analysis
-coverage changes that may lead to the loss of reports compared to the 
-non-CTU baseline version.
+coverage changes that may lead to the loss of true and false positive reports 
+compared to the non-CTU baseline version.
 \keywords C++ programming language, static analysis, cross translation unit analysis, clang
 \end{abstract}
 
@@ -247,8 +247,8 @@ suspect two reasons:
 
   \item It is also possible that some of the findings disappeared
         compared the baseline because they were false positives as they were
-        based on false assumptions about unknown external functions. However
-        we think this is only case to a less extent as Clang SA checkers are written
+        based on false assumptions about unknown result of called external functions. 
+        However we think this is only case to a less extent as Clang SA checkers are written
         conservatively to report less false positives.
 \end{enumerate}
 
